@@ -13,6 +13,13 @@ def normalize_ecosystem(ecosystem):
     return ecosystem
 
 
+def clean_package_name(package_name):
+    last_nm_idx = package_name.rfind("node_modules/")
+    if last_nm_idx != -1:
+        package_name = package_name[last_nm_idx + len("node_modules/"):]
+    return package_name
+
+
 def detect_format(file_path):
     _, ext = os.path.splitext(file_path)
     ext = ext.lower()
@@ -75,7 +82,7 @@ def parse_cyclonedx_json(file_path):
         
         if name and version:
             packages.append({
-                'name': name,
+                'name': clean_package_name(name),
                 'version': version,
                 'ecosystem': normalize_ecosystem(ecosystem),
                 'license': license_info
@@ -124,7 +131,7 @@ def parse_cyclonedx_xml(file_path):
         
         if name and version:
             packages.append({
-                'name': name,
+                'name': clean_package_name(name),
                 'version': version,
                 'ecosystem': normalize_ecosystem(ecosystem),
                 'license': license_info
@@ -162,7 +169,7 @@ def parse_spdx_json(file_path):
         
         if name and version:
             packages.append({
-                'name': name,
+                'name': clean_package_name(name),
                 'version': version,
                 'ecosystem': normalize_ecosystem(ecosystem),
                 'license': license_info
@@ -208,7 +215,7 @@ def parse_spdx_xml(file_path):
         
         if name and version:
             packages.append({
-                'name': name,
+                'name': clean_package_name(name),
                 'version': version,
                 'ecosystem': normalize_ecosystem(ecosystem),
                 'license': license_info
@@ -229,7 +236,7 @@ def parse_csv(file_path):
             
             if name and version and ecosystem:
                 packages.append({
-                    'name': name,
+                    'name': clean_package_name(name),
                     'version': version,
                     'ecosystem': normalize_ecosystem(ecosystem),
                     'license': license_info
