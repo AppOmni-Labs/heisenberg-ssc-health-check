@@ -14,7 +14,6 @@ DEFAULT_ORG = _settings.org
 
 
 def clean_package_name(package_name):
-    """Clean npm transitive dependency paths to extract just the package name."""
     last_nm_idx = package_name.rfind("node_modules/")
     if last_nm_idx != -1:
         package_name = package_name[last_nm_idx + len("node_modules/"):]
