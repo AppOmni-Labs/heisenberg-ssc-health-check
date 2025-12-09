@@ -12,6 +12,14 @@ _settings = Settings()
 
 DEFAULT_ORG = _settings.org
 
+
+def clean_package_name(package_name):
+    last_nm_idx = package_name.rfind("node_modules/")
+    if last_nm_idx != -1:
+        package_name = package_name[last_nm_idx + len("node_modules/"):]
+    return package_name
+
+
 def add_arguments(parser):  
     g = parser.add_mutually_exclusive_group(required=True)
     g.add_argument("-a", "--all", action="store_true", help="Use repos from repos.txt in working directory")  
@@ -64,6 +72,7 @@ def cli(args=None):
             writer.writerow(["package", "version", "language", "license"])
             for pkg in packages:
                 name = pkg.get("name", "")
+                name = clean_package_name(name)
                 version = pkg.get("versionInfo", "")
                 language = ""
                 for ref in pkg.get("externalRefs", []):
