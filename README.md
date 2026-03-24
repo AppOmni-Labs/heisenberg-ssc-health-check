@@ -9,6 +9,7 @@ Heisenberg is a software supply chain health check tool that analyzes dependenci
 -   `heisenberg check` - Inspect a single package@version (npm, PyPI, Go)
 -   `heisenberg bulk` - Generate SBOMs for one or more repos or list of repos from the file, then parallel-check all dependencies and writes a CSV report. Also supports **vendor SBOM assessment** (CycloneDX, SPDX, CSV formats) in `vendor` mode.
 -   `heisenberg sbom` - Generate SBOMs for one or more repos [in case you need one].
+-   `heisenberg actions` - Assess GitHub Actions supply chain health across repos. Detects unpinned actions, fetches repo metadata and security advisories, and resolves internal shared actions to their real third-party dependencies. Supports incident response filtering (`-pkg`, `-file`) to instantly find which repos use a specific action.
 -   Adds **Custom Health Score** (experimental) that blends popularity, maintenance, vulnerabilities, and dependents (weighing heavier into security).
 -   CSV includes cross-check URLs (deps.dev / Snyk / Socket).
 
@@ -32,6 +33,12 @@ heisenberg vendor --sbom-file vendor.cdx.json -o vendor_report.csv
 
 # 6. Analyze repos for presence of affected packages
 heisenberg analyze -r repo1,repo2 -pkg chalk,debug
+
+# 7. Assess GitHub Actions supply chain health
+heisenberg actions -r repo1,repo2 -o actions_report.csv
+
+# 8. Incident response — find which repos use a specific GHA
+heisenberg actions -a --repos-file repos.txt -pkg aquasecurity/trivy-action@0.30.0 -o gha_hits.csv
 ```
 
 ## Installation
@@ -75,17 +82,18 @@ python -m heisenberg.main analyze -r repo1,repo2 --org your-org -pkg left-pad -o
 ## Usage
 CLI's 5 separate modes:
 ```
-usage: heisenberg [-h] {sbom,check,bulk,vendor,analyze} ...
+usage: heisenberg [-h] {sbom,check,bulk,vendor,analyze,actions} ...
 
 Heisenberg toolkit
 
 positional arguments:
-  {sbom,check,bulk,analyze}
+  {sbom,check,bulk,vendor,analyze,actions}
     sbom                Generate SBOMs from GitHub repos
     check               Check a single package via deps.dev
     bulk                Run bulk health checks over repos
     vendor              Assess vendor/third-party SBOM
     analyze             Find and return compromised packages in an SBOM
+    actions             Check GitHub Actions supply chain health
 
 options:
   -h, --help            show this help message and exit
@@ -272,6 +280,59 @@ walter-white 💀 heisenberg [main] -> heisenberg analyze -r blue_sky -file affe
 [INFO] Done. Results saved to blue_sky_sbom_sbom_results.csv
 [INFO] Cleaned up SBOM directory: sbom
 ```
+
+### Actions Mode
+This mode assess GitHub Actions supply chain health across one or more repos. Fetches workflow files, extracts every `uses:` directive, and enriches each with GitHub repo metadata and security advisories. Automatically resolves internal shared actions (e.g. `YOUR_ORG/.github/actions/perform-trivy-scan@v1.2.3`) to their real third-party dependencies — so risk hidden inside your shared actions repo is surfaced.
+
+Set `HEIS_SHARED_ACTIONS_REPO` to the name of your shared actions repo (default: `.github`).
+
+```
+usage: heisenberg actions [-h] (-r REPOS | -a) [--org ORG] [--repos-file REPOS_FILE] [-o OUTPUT] [-pkg PKG | -file FILE]
+
+options:
+  -h, --help                  show this help message and exit
+  -r REPOS, --repos REPOS     Comma-separated repo list, e.g. repo1,repo2
+  -a, --all                   Use repos from --repos-file
+  --org ORG                   GitHub org name
+  --repos-file REPOS_FILE     Path to repos.txt (used with -a)
+  -o OUTPUT, --output OUTPUT  Output CSV path (default: actions_results.csv)
+  -pkg PKG, --pkg PKG         Filter output to specific actions, e.g. tj-actions/changed-files
+  -file FILE, --file FILE     Text file of action names to filter on (one per line)
+```
+
+#### Examples
+```
+# Full inventory for one repo
+heisenberg actions -r myrepo --org myorg -o actions_results.csv
+
+# Full inventory across all repos
+heisenberg actions -a --repos-file repos.txt --org myorg -o actions_results.csv
+
+# Incident response — which repos use a specific action?
+heisenberg actions -r repo1,repo2,repo3 --org myorg -pkg aquasecurity/trivy-action@0.30.0 -o hits.csv
+
+# Incident response — check against a list of known-bad actions or multiple version of the same action
+heisenberg actions -a --repos-file repos.txt --org myorg -file compromised_actions.txt -o hits.csv
+```
+
+#### Output CSV columns
+```
+repo, workflow_file, resolved_via, full_action, owner, action_repo, ref, is_sha_pinned, action_type, stars, forks, archived, disabled, last_push, action_description, advisories, repo_error
+```
+
+**What to look for:**
+- `is_sha_pinned = False` — action is on a mutable tag, vulnerable to tag-hijack
+- `resolved_via` populated — third-party action reached through an internal shared action; risk is inherited by every repo calling it
+- `archived = True` — action repo is no longer maintained
+- `advisories` — GHSA IDs published on the action's repo
+
+#### Searching an existing actions CSV with `analyze`
+If you already have an actions CSV on disk, search it with `analyze` using `--column full_action`:
+```
+heisenberg analyze -sbom actions_results.csv -pkg aquasecurity/trivy-action@0.30.0 --column full_action
+heisenberg analyze -sbom actions_results.csv -file compromised_actions.txt --column full_action
+```
+---
 
 ## Github Action
 Heisenberg comes with Github Action for proactive detection. If you wish to try it, follow this link - https://github.com/appomni/test-gha-prodsec

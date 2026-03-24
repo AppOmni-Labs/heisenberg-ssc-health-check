@@ -6,6 +6,7 @@ class Settings:
     org: str = os.getenv("GITHUB_ORG", "")  
     sbom_dir: str = os.getenv("HEIS_SBOM_DIR", "sbom")  
     output_csv: str = os.getenv("HEIS_OUTPUT", "repos_sbom_results.csv") 
+    shared_actions_repo: str = os.getenv("HEIS_SHARED_ACTIONS_REPO", ".github")
 
     deps_script: str = os.getenv("HEIS_DEPS_SCRIPT", "heisenberg_depsdev.py")  
 

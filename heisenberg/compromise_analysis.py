@@ -45,28 +45,28 @@ def _dedupe_rows_preserve_order(rows):
         out.append(r)
     return out
 
-def _load_header_and_rows(sbom_csv):
+def _load_header_and_rows(sbom_csv, match_column="package"):
     if not os.path.exists(sbom_csv):
         raise FileNotFoundError(f"SBOM not found: {sbom_csv}")
     with open(sbom_csv, "r", encoding="utf-8", newline="") as f:
         reader = csv.DictReader(f)
         header = reader.fieldnames or []
-        if "package" not in header:
-            raise ValueError("SBOM CSV is missing required 'package' column.")
+        if match_column not in header:
+            raise ValueError(f"SBOM CSV is missing required '{match_column}' column.")
         rows = list(reader)
     return header, rows
 
 
-def run_analyze(sbom_csv, targets, case_sensitive):
+def run_analyze(sbom_csv, targets, case_sensitive, match_column="package"):
     print(f"[INFO] Loading SBOM: {sbom_csv}")
-    header, rows = _load_header_and_rows(sbom_csv)
+    header, rows = _load_header_and_rows(sbom_csv, match_column=match_column)
 
-    print(f"[INFO] Matching {len(targets)} target package name(s)")
+    print(f"[INFO] Matching {len(targets)} targeta against column '{match_column}'")
     wanted = { _normalize(x, case_sensitive) for x in targets if x.strip() }
 
     matches = []
     for row in rows:
-        pkg = row.get("package", "")
+        pkg = row.get(match_column, "")
         if _normalize(pkg, case_sensitive) in wanted:
             matches.append([row.get(col, "") for col in header])
 
@@ -90,6 +90,8 @@ def add_arguments(parser):
                         help=f"Output CSV path (default: {DEFAULT_OUTPUT})")
     parser.add_argument("--case-sensitive", action="store_true",
                         help="Match package names case-sensitively (default: case-insensitive).")
+    parser.add_argument("--column", default="package",
+                        help="CSV column to match against (default: 'package'). Use 'full_action' for actions investigations.")
     parser.add_argument("--org", default=_settings.org,
                         help="GitHub org name (used when -r/--repos or -a/--all is provided).")
     parser.add_argument("--repos-file", default=_settings.repos_file_name,
@@ -132,7 +134,7 @@ def main(args=None):
     
     if getattr(args, "sbom", None):
         try:
-            header, rows = run_analyze(args.sbom, targets, args.case_sensitive)
+            header, rows = run_analyze(args.sbom, targets, args.case_sensitive, match_column=args.column)
         except Exception as e:
             print(f"[ERROR] {e}")
             return 1
