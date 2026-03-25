@@ -136,7 +136,7 @@ def cli(args=None) -> None:
     targets = _load_targets(args)
     if targets:                                                                                                          
         print(f"[INFO] Filtering output to {len(targets)} target action(s)")                                             
-        run_actions_bulk(args.org, repos, args.output, token, SHARED_ACTIONS_REPO, targets=targets) 
+    run_actions_bulk(args.org, repos, args.output, token, SHARED_ACTIONS_REPO, targets=targets) 
     print(f"[INFO] Done. Results saved to {args.output}")
 
 

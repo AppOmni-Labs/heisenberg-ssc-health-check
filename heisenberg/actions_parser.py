@@ -4,7 +4,7 @@ import re
 import requests
 import yaml
 from base64 import b64decode
-from actions_checker import _github_headers
+from .actions_checker import _github_headers
 
 
 _SHA_RE = re.compile(r'^[0-9a-f]{40}$')
