@@ -190,6 +190,8 @@ def process_sbom_file(input_file, repo_name, writer):
 
             if package_manager == "golang":
                 package_manager = "go"
+            if package_manager == "rust":
+                package_manager = "cargo"
 
             if not name or not version or not package_manager:
                 print(f"Skipping incomplete row: {row}")

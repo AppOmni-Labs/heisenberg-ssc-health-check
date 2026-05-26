@@ -7,7 +7,8 @@ import sys
 import math
 from datetime import datetime, timezone
 
-from .npm_postinstall import check_npm_postinstall  
+from .npm_postinstall import check_npm_postinstall
+from .cargo_build_script import check_cargo_build_script
 
 
 BASE_URL = "https://api.deps.dev/v3" 
@@ -20,7 +21,7 @@ def parse_args():
 def add_arguments(parser):
     parser.add_argument("mode", nargs="?", default="main_package", choices=["main_package"],
                         help="Only 'main_package' is supported.")
-    parser.add_argument("-mgmt", "--mgmt", required=True, help="Package management system (e.g., pypi or npm)")
+    parser.add_argument("-mgmt", "--mgmt", required=True, help="Package management system (e.g., pypi, npm, go, cargo)")
     parser.add_argument("-pkg", "--pkg", required=True, help="Package name")
     parser.add_argument("-v", "--version", required=True, help="Package version")
 
@@ -56,6 +57,26 @@ def fetch_pypi_deprecated(package_manager, package_name, package_version):
             if c.strip().lower() == "development status :: 7 - inactive".lower():
                 return "Inactive/Deprecated (Development Status :: 7 - Inactive)"
 
+        return None
+    except Exception:
+        return None
+
+def fetch_cargo_deprecated(package_manager, package_name, package_version):
+    """Checks if the cargo package was potentially deprecated / yanked."""
+    if package_manager != "cargo":
+        return None
+    url = f"https://crates.io/api/v1/crates/{package_name}/{package_version}"
+    try:
+        resp = requests.get(
+            url, 
+            headers={"User-Agent": "heisenberg-ssc-health-check (https://github.com/AppOmni-Labs/heisenberg-ssc-health-check)"},
+            timeout=10, 
+        )
+        if resp.status_code != 200:
+            return None
+        version_info = resp.json().get("version", {}) or {}
+        if version_info.get("yanked"):
+            return "Yanked from crates.io"
         return None
     except Exception:
         return None
@@ -142,7 +163,7 @@ def compute_custom_health_score(parsed):
 def check_package(package_manager, package_name, package_version):
     """Fetches package health."""   
     package_manager = package_manager.lower()  
-    supported = {"pypi", "npm", "go"}  
+    supported = {"pypi", "npm", "go", "cargo"}  
     if package_manager not in supported:  
         return {"error": f"manager '{package_manager}' not supported"}  
     
@@ -154,6 +175,8 @@ def check_package(package_manager, package_name, package_version):
         deprecated = fetch_npm_deprecated(package_manager, package_name, package_version)
     elif package_manager == "pypi":
         deprecated = fetch_pypi_deprecated(package_manager, package_name, package_version)
+    elif package_manager == "cargo":
+        deprecated = fetch_cargo_deprecated(package_manager, package_name, package_version)
 
     if version_response.status_code != 200:  
         return {
@@ -221,6 +244,8 @@ def map_ecosystems(package_manager):
         return "npm-package", "npm"
     elif package_manager == "go":
         return "golang", "go"
+    elif package_manager == "cargo":
+        return "cargo", "cargo"
     else:
         return package_manager, package_manager
 
@@ -252,7 +277,8 @@ def print_report(
     PACKAGE_MANAGER,
     published_at_iso,     
     fresh_flag,
-    npminfo=None 
+    npminfo=None,
+    cargoinfo=None,
 ):
     """Prints report for fetched package and its version."""
     scorecard = {check["name"]: check for check in project_data.get("scorecard", {}).get("checks", [])}
@@ -300,6 +326,13 @@ def print_report(
         if has_post == "Yes":
             short_cmd = (post_cmd[:160] + "…") if len(post_cmd) > 160 else post_cmd
             print(f"Postinstall Cmd: {short_cmd or 'N/A'}")
+    
+    if PACKAGE_MANAGER == "cargo":
+        has_build = "Yes" if (cargoinfo and cargoinfo.get("has_build_script")) else "No"
+        build_path = (cargoinfo or {}).get("build_script_path") or ""
+        print(f"Has Build Script (build.rs): {has_build}")
+        if has_build == "Yes":
+            print(f"Build Script Path: {build_path}")
 
     print("\n[Cross-Check URLs]")
     pkg_safe_name = PACKAGE_NAME.replace("/", "%2F")
@@ -315,7 +348,7 @@ def cli(args=None):
     if args is None:           
         args = parse_args()  
 
-    SUPPORTED_MANAGERS = {"pypi", "npm", "go"}
+    SUPPORTED_MANAGERS = {"pypi", "npm", "go", "cargo"}
 
     PACKAGE_MANAGER = args.mgmt.lower()
     if PACKAGE_MANAGER not in SUPPORTED_MANAGERS:
@@ -331,6 +364,8 @@ def cli(args=None):
         deprecated = fetch_npm_deprecated(PACKAGE_MANAGER, PACKAGE_NAME, PACKAGE_VERSION)
     elif PACKAGE_MANAGER == "pypi":
         deprecated = fetch_pypi_deprecated(PACKAGE_MANAGER, PACKAGE_NAME, PACKAGE_VERSION)
+    elif PACKAGE_MANAGER == "cargo":
+        deprecated = fetch_cargo_deprecated(PACKAGE_MANAGER, PACKAGE_NAME, PACKAGE_VERSION)
     version_response = fetch_version_data(BASE_URL, PACKAGE_MANAGER, ENCODED_PACKAGE_NAME, PACKAGE_VERSION)
 
     if version_response.status_code != 200:
@@ -362,6 +397,13 @@ def cli(args=None):
         except Exception as e:
             npminfo = {"has_postinstall": False, "lifecycle": [], "postinstall_cmd": "", "error": str(e)}
 
+    cargoinfo = None
+    if PACKAGE_MANAGER == "cargo":
+        try:
+            cargoinfo = check_cargo_build_script(PACKAGE_NAME, PACKAGE_VERSION)
+        except Exception as e:
+            cargoinfo = {"has_build_script": False, "build_script_path": "", "error": str(e)}
+
     print_report(
         PACKAGE_NAME=PACKAGE_NAME,
         PACKAGE_VERSION=PACKAGE_VERSION,
@@ -375,6 +417,7 @@ def cli(args=None):
         published_at_iso=published_at_iso,  
         fresh_flag=fresh_flag,
         npminfo=npminfo,
+        cargoinfo=cargoinfo,
     )
 
 if __name__ == "__main__": 
