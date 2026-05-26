@@ -6,7 +6,7 @@
 Heisenberg is a software supply chain health check tool that analyzes dependencies using deps.dev, SBOMs, and external advisories. It helps measure package health, detect potential risks, and generate reports for individual dependencies or in bulk.
 
 ## Features
--   `heisenberg check` - Inspect a single package@version (npm, PyPI, Go)
+-   `heisenberg check` - Inspect a single package@version (npm, PyPI, Go, Cargo)
 -   `heisenberg bulk` - Generate SBOMs for one or more repos or list of repos from the file, then parallel-check all dependencies and writes a CSV report. Also supports **vendor SBOM assessment** (CycloneDX, SPDX, CSV formats) in `vendor` mode.
 -   `heisenberg sbom` - Generate SBOMs for one or more repos [in case you need one].
 -   `heisenberg actions` - Assess GitHub Actions supply chain health across repos. Detects unpinned actions, fetches repo metadata and security advisories, and resolves internal shared actions to their real third-party dependencies. Supports incident response filtering (`-pkg`, `-file`) to instantly find which repos use a specific action.
@@ -128,7 +128,7 @@ heisenberg sbom -a -out repos_sbom
 ```
 
 ### Check Mode
-Inspect a single package@version (npm, PyPI, Go) and print a human-readable report to stdout.
+Inspect a single package@version (npm, PyPI, Go, Cargo) and print a human-readable report to stdout.
 ```
 usage: heisenberg check [-h] -mgmt MGMT -pkg PKG -v VERSION [{main_package}]
 
@@ -137,7 +137,7 @@ positional arguments:
 
 options:
   -h, --help                     show this help message and exit
-  -mgmt MGMT, --mgmt MGMT        Package management system (e.g., pypi or npm)
+  -mgmt MGMT, --mgmt MGMT        Package management system (e.g., pypi, npm, go, cargo)
   -pkg PKG, --pkg PKG            Package name
   -v VERSION, --version VERSION  Package version
 ```
@@ -151,6 +151,9 @@ heisenberg check -mgmt npm -pkg lodash -v 4.17.21
 
 # Go
 heisenberg check -mgmt go -pkg github.com/spf13/cobra -v v1.8.1
+
+# Rust
+heisenberg check -mgmt cargo -pkg libc -v 0.2.153
 ```
 #### Example of what you will see
 ```
