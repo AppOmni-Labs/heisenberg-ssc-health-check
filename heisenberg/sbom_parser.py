@@ -10,6 +10,8 @@ def normalize_ecosystem(ecosystem):
     ecosystem = ecosystem.lower()
     if ecosystem == "golang":
         return "go"
+    if ecosystem == "rust":
+        return "cargo"
     return ecosystem
 
 
