@@ -1,0 +1,10 @@
+{
+  "spdxVersion": "SPDX-2.3",
+  "packages": [
+    {"name": "flask", "versionInfo": "3.0.0", "licenseConcluded": "BSD-3-Clause",
+     "externalRefs": [{"referenceType": "purl", "referenceLocator": "pkg:pypi/flask@3.0.0"}]},
+    {"name": "tokio", "versionInfo": "1.37.0", "licenseConcluded": "NOASSERTION", "licenseDeclared": "MIT",
+     "externalRefs": [{"referenceType": "purl", "referenceLocator": "pkg:cargo/tokio@1.37.0"}]},
+    {"name": "root-document", "versionInfo": ""}
+  ]
+}

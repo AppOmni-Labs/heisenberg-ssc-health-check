@@ -19,3 +19,15 @@ heisenberg = "heisenberg.main:cli"
 [tool.setuptools.packages.find]
 include = ["heisenberg*"]    
 exclude = ["img*", "tests*", "docs*"]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.2.0",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra --strict-markers -m 'not live'"
+markers = [
+    "live: end-to-end tests that call real external APIs (deps.dev, PyPI, npm, crates.io). Run with: pytest -m live",
+]

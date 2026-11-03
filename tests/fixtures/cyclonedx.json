@@ -1,0 +1,13 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.5",
+  "components": [
+    {"name": "node_modules/foo/node_modules/left-pad", "version": "1.3.0", "purl": "pkg:npm/left-pad@1.3.0",
+     "licenses": [{"license": {"id": "MIT"}}]},
+    {"name": "requests", "version": "2.32.3", "purl": "pkg:pypi/requests@2.32.3",
+     "licenses": [{"expression": "Apache-2.0 OR MIT"}]},
+    {"name": "github.com/pkg/errors", "version": "v0.9.1", "purl": "pkg:golang/github.com/pkg/errors@v0.9.1"},
+    {"name": "no-version-pkg", "purl": "pkg:npm/no-version-pkg"},
+    {"name": "mystery", "version": "1.0.0"}
+  ]
+}

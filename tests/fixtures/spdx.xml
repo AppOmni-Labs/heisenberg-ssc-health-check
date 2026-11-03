@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<SpdxDocument xmlns="http://spdx.org/rdf/terms">
+  <package>
+    <name>express</name>
+    <versionInfo>4.19.2</versionInfo>
+    <licenseConcluded>NOASSERTION</licenseConcluded>
+    <licenseDeclared>MIT</licenseDeclared>
+    <externalRef>
+      <referenceType>purl</referenceType>
+      <referenceLocator>pkg:npm/express@4.19.2</referenceLocator>
+    </externalRef>
+  </package>
+  <package>
+    <name>golang.org/x/text</name>
+    <versionInfo>v0.14.0</versionInfo>
+    <licenseConcluded>BSD-3-Clause</licenseConcluded>
+    <externalRef>
+      <referenceType>purl</referenceType>
+      <referenceLocator>pkg:golang/golang.org/x/text@v0.14.0</referenceLocator>
+    </externalRef>
+  </package>
+</SpdxDocument>

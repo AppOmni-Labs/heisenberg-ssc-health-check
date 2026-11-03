@@ -1,0 +1,7 @@
+package,version,language,license
+requests,2.32.3,pypi,Apache-2.0
+left-pad,1.3.0,npm,MIT
+Left-Pad,1.3.0,npm,MIT
+serde,1.0.200,rust,MIT
+github.com/pkg/errors,v0.9.1,golang,BSD-2-Clause
+incomplete,,npm,MIT

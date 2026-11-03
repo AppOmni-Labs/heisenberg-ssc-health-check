@@ -1,0 +1,16 @@
+version: 2
+updates:
+  # Keep SHA-pinned GitHub Actions up to date.
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    cooldown:
+      default-days: 7
+  # Keep uv.lock dependencies up to date.
+  - package-ecosystem: "uv"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    cooldown:
+      default-days: 7

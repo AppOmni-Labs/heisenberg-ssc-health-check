@@ -99,6 +99,13 @@ uv tool install "git+https://github.com/flipbitter/heisenberg-sscs-extended"
 ```
 To add or update dependencies use `uv add <package>` / `uv lock --upgrade`, and commit the updated `uv.lock`.
 
+### Testing
+```
+uv run pytest              # offline unit + end-to-end tests (network access is blocked; HTTP is faked)
+uv run pytest -m live      # live end-to-end tests against the real deps.dev / PyPI / npm / crates.io APIs
+```
+CI (`.github/workflows/ci.yml`) runs the offline suite on Python 3.11.9, 3.12 and 3.13 for every pull request and push to `main`, then the live end-to-end suite. Tests marked `xfail(strict=True)` document known bugs; once a bug is fixed, the test starts passing, CI fails, and the marker should be removed.
+
 ## Usage
 CLI's 5 separate modes:
 ```

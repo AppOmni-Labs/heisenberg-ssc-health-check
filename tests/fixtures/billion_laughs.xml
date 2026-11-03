@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<!DOCTYPE bom [
+  <!ENTITY a "aaaaaaaaaa">
+  <!ENTITY b "&a;&a;&a;&a;&a;&a;&a;&a;&a;&a;">
+  <!ENTITY c "&b;&b;&b;&b;&b;&b;&b;&b;&b;&b;">
+]>
+<bom xmlns="http://cyclonedx.org/schema/bom/1.5"><components><component><name>&c;</name><version>1</version></component></components></bom>

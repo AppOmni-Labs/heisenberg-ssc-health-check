@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bom xmlns="http://cyclonedx.org/schema/bom/1.5" version="1">
+  <components>
+    <component type="library">
+      <name>serde</name>
+      <version>1.0.200</version>
+      <purl>pkg:cargo/serde@1.0.200</purl>
+      <licenses><license><id>MIT</id></license></licenses>
+    </component>
+    <component type="library">
+      <name>lodash</name>
+      <version>4.17.21</version>
+      <purl>pkg:npm/lodash@4.17.21</purl>
+      <licenses><license><name>Custom License</name></license></licenses>
+    </component>
+    <component type="library">
+      <name>unversioned</name>
+    </component>
+  </components>
+</bom>
