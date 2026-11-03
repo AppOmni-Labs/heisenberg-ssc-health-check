@@ -79,6 +79,26 @@ python -m heisenberg.main bulk -r repo1,repo2 --org your-org --sbom-dir sbom_tmp
 python -m heisenberg.main analyze -r repo1,repo2 --org your-org -pkg left-pad -o findings.csv
 ```
 
+### Using uv
+The project is a [uv](https://docs.astral.sh/uv/) project (`pyproject.toml` + `uv.lock` + `.python-version`). uv will download the pinned Python automatically if needed.
+```
+cd heisenberg-ssc-health-check
+uv sync                              # create .venv and install locked dependencies + the heisenberg CLI
+
+# Option 1: run through uv (no activation needed)
+uv run heisenberg check -mgmt pypi -pkg requests -v 2.32.3
+uv run python -m heisenberg.main sbom -r my_repo
+
+# Option 2: activate the env and use it directly
+source .venv/bin/activate
+heisenberg bulk -r repo1,repo2 --org your-org --sbom-dir sbom_tmp -o results.csv
+deactivate
+
+# Install globally as a tool (alternative to pipx)
+uv tool install "git+https://github.com/AppOmni-Labs/heisenberg-ssc-health-check"
+```
+To add or update dependencies use `uv add <package>` / `uv lock --upgrade`, and commit the updated `uv.lock`.
+
 ## Usage
 CLI's 5 separate modes:
 ```
