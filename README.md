@@ -20,7 +20,7 @@ export GITHUB_TOKEN=ghp_YOUR_TOKEN
 export GITHUB_ORG=your-github-org
 
 # 2. Install with pipx [if you don't want to install keep reading]
-pipx install "git+https://github.com/AppOmni-Labs/heisenberg-ssc-health-check"
+pipx install "git+https://github.com/flipbitter/heisenberg-sscs-extended"
 
 # 3. Check a single package
 heisenberg check -mgmt npm -pkg lodash -v 4.17.21
@@ -51,17 +51,17 @@ Heisenberg requires python 3.11.
 If you would like to install you can do the following:
 ```
 # Install with pipx
-pipx install "git+https://github.com/AppOmni-Labs/heisenberg-ssc-health-check"
+pipx install "git+https://github.com/flipbitter/heisenberg-sscs-extended"
 export GITHUB_ORG=your-github-org                       # this needed so you don't need to supply github org in every command
 
 # From source
-git clone https://github.com/AppOmni-Labs/heisenberg-ssc-health-check
+git clone https://github.com/flipbitter/heisenberg-sscs-extended
 
 # You have the choice to export GITHUB_ORG as above export GITHUB_ORG=your-github-org
 # Or you can set org manually in the config before installing
 # Or if none of that works for you, you can supply org manually in the command using --org
 
-cd heisenberg-ssc-health-check
+cd heisenberg-sscs-extended
 # open heisenberg/config.py and find this line - org: str = os.getenv("GITHUB_ORG", "")
 # change it to - org: str = os.getenv("GITHUB_ORG", "my-github-org") and save. Then run install.
 
@@ -69,8 +69,8 @@ pip install -e .
 ```
 If you do not wish to install the tool you can just clone it and run it directly with python
 ```
-git clone https://github.com/AppOmni-Labs/heisenberg-ssc-health-check
-cd heisenberg-ssc-health-check
+git clone https://github.com/flipbitter/heisenberg-sscs-extended
+cd heisenberg-sscs-extended
 
 # Run the CLI via modules:
 python -m heisenberg.main sbom -r my_repo
@@ -82,7 +82,7 @@ python -m heisenberg.main analyze -r repo1,repo2 --org your-org -pkg left-pad -o
 ### Using uv
 The project is a [uv](https://docs.astral.sh/uv/) project (`pyproject.toml` + `uv.lock` + `.python-version`). uv will download the pinned Python automatically if needed.
 ```
-cd heisenberg-ssc-health-check
+cd heisenberg-sscs-extended
 uv sync                              # create .venv and install locked dependencies + the heisenberg CLI
 
 # Option 1: run through uv (no activation needed)
@@ -95,7 +95,7 @@ heisenberg bulk -r repo1,repo2 --org your-org --sbom-dir sbom_tmp -o results.csv
 deactivate
 
 # Install globally as a tool (alternative to pipx)
-uv tool install "git+https://github.com/AppOmni-Labs/heisenberg-ssc-health-check"
+uv tool install "git+https://github.com/flipbitter/heisenberg-sscs-extended"
 ```
 To add or update dependencies use `uv add <package>` / `uv lock --upgrade`, and commit the updated `uv.lock`.
 
